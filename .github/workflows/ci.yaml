@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check out sibling repositories
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ORG: ${{ github.repository_owner }}
+        run: |
+          for repository in auth-service catalog-service cart-service order-service payment-service frontend gateway; do
+            gh repo clone "${ORG}/sports-store-${repository}" "../sports-store-${repository}" -- --depth=1
+          done
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install validators
+        run: python -m pip install PyYAML==6.0.3 yamllint==1.37.1
+      - name: Lint YAML
+        run: yamllint -c .yamllint.yaml docker-compose.yml
+      - name: Validate Compose model
+        env:
+          MONGO_ROOT_PASSWORD: validation-only
+          JWT_SECRET: validation-only
+          PAYMENT_FAILURE_SUFFIX: "0000"
+        run: docker compose config --quiet
+      - name: Validate declarations, contexts, and local routing
+        run: python scripts/validate-compose.py

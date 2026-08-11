@@ -12,7 +12,7 @@ docker compose ps
 curl http://localhost:8080/health
 ```
 
-On PowerShell, use `Copy-Item .env.example .env` instead of `cp`. The storefront is available at <http://localhost:8080>. Only the gateway publishes a host port; frontend, backends, and MongoDB remain on the internal Compose network.
+On PowerShell, use `Copy-Item .env.example .env` instead of `cp`. The storefront is available at <http://localhost:8080>. Only the local-development Gateway publishes a host port; frontend, backends, and MongoDB remain on the internal Compose network. This adapter is not part of the AWS/EKS or Minikube request path and is not published to ECR.
 
 Stop the stack without deleting MongoDB data:
 

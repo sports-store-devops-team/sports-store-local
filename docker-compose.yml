@@ -112,7 +112,7 @@ services:
   frontend:
     build: ../sports-store-frontend
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost/ || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/ || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -122,7 +122,7 @@ services:
   gateway:
     build: ../sports-store-gateway
     ports:
-      - "8080:80"
+      - "8080:8080"
     depends_on:
       frontend:
         condition: service_healthy
@@ -137,7 +137,7 @@ services:
       payment-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost/health || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/health || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 5
